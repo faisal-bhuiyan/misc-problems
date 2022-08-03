@@ -7,16 +7,13 @@
 using namespace std;
 
 struct Car {
-public:
     string brand;
     string model;
     int year;
 
     Car() : brand(string("X")), model(string("Y")), year(0) {};
 
-    Car(string brand, string model, int year) :
-        brand(brand), model(model), year(year) {
-    };
+    Car(string brand, string model, int year) : brand(brand), model(model), year(year) {};
 };
 
 bool operator==(const Car& car1, const Car& car2) {
@@ -24,7 +21,9 @@ bool operator==(const Car& car1, const Car& car2) {
         cout << "Provided cars are the same!" << "\n";
         return true;
     }
+
     cout << "Provided cars are different!" << "\n";
+
     return false;
 }
 

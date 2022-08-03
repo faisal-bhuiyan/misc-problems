@@ -1,5 +1,5 @@
 // quadratic_eqn.cpp: Faisal Bhuiyan
-// Description: Solve a quadratic equation
+// Description: Solve a second order polynomial equation
 
 #include <cmath>
 #include <iostream>
