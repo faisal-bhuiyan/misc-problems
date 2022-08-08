@@ -48,8 +48,21 @@ Point operator-(const Point& p1, const Point& p2) {
 }
 
 bool operator==(const Point& p1, const Point& p2) {
-    // TODO We need to define a custom function to compare real numbers
-    return p1.GetX() == p2.GetX() && p1.GetY() == p2.GetY();
+    auto close_to = [](double a, double b)->bool {
+        if (a < 1e-6) {
+            if (b < 1e-6) {
+                return true;
+            }
+            return false;
+        }
+
+        if (((a - b) / a ) < 1e-6) {
+            return true;
+        }
+        return false;
+    };
+
+    return close_to(p1.GetX(), p2.GetX()) && close_to(p1.GetY(), p2.GetY());
 }
 
 bool operator!=(const Point& p1, const Point& p2) {
@@ -154,7 +167,10 @@ public:
         for (auto&& p : eyes_) {
             p->Draw();
         }
-        mouth_->Draw();
+
+        if (mouth_) {
+            mouth_->Draw();
+        }
     }
 
     void AddEye(unique_ptr<Shape> s) {
@@ -174,37 +190,43 @@ private:
 
 
 void PrintInformation(const Shape& shape) {
-  std::cout << shape.Area() << '\n';
+    cout << "center: " << shape.Center().GetX() << ", " << shape.Center().GetY() << '\t';
+    cout << "area: " << shape.Area() << '\n';
 }
 
-void draw_all(vector<unique_ptr<Shape>>& v) {
+void DrawAll(vector<unique_ptr<Shape>>& v) {
     for (auto&& p : v) {
         p->Draw();
     }
 }
 
-void rotate_all(vector<unique_ptr<Shape>>& v, int angle=0) {
+void RotateAll(vector<unique_ptr<Shape>>& v, int angle=0) {
     for (auto&& p : v) {
         p->Rotate(angle);
     }
 }
 
-void user() {
+// This is an example user of the Shapes class
+void User() {
     vector<unique_ptr<Shape>> v;
     v.push_back(make_unique<Rectangle>(3, 4));
     v.push_back(make_unique<Square>(5));
     v.push_back(make_unique<Circle>(3, 10, 10));
     v.push_back(make_unique<Smiley>(Point(1, 1), 7));
 
-    draw_all(v);
-    rotate_all(v, 45);
+    DrawAll(v);
+    RotateAll(v, 45);
 }
 
 int main() {
     Rectangle r(3, 4);
     Circle c(3, 10, 10);
+    Square s(5);
 
     PrintInformation(r);
     PrintInformation(c);
+    PrintInformation(s);
+
+    User();
 }
 
