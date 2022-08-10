@@ -39,8 +39,8 @@ void Composer::Demote(int decrement) {
     }
 }
 
-void Composer::Display() {
-    std::cout << "Composer: " << this->first_name_ << " " << this->last_name_ << '\n' <<
+void Composer::Display() const {
+    std::cout << '\n' << "Composer: " << this->first_name_ << " " << this->last_name_ << '\n' <<
         "Year of birth: " << this->composer_yob_ << '\n' <<
         "Genre of music: " << this->composer_genre_ << '\n' <<
         "A fun fact: " << this->fact_ << '\n' <<

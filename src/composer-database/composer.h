@@ -12,13 +12,13 @@
 
 #include <string>
 
-constexpr int kDefaultRanking = 10;
-
 /* Class for managing a Composer record.
  * The default ranking is 10 which is the lowest possible.
  */
 class Composer {
 public:
+    static constexpr int kDefaultRanking = 10;
+
     Composer();
     Composer(std::string first_name, std::string last_name, int yob, std::string genre, std::string fact,
         int ranking=kDefaultRanking);
@@ -49,7 +49,7 @@ public:
     void Demote(int decrement);
 
     /// Display all the attributes of a composer
-    void Display();
+    void Display() const;
 
 private:
     std::string first_name_;
