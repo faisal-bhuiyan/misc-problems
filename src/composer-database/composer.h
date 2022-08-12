@@ -1,13 +1,5 @@
 /* composer.h: Faisal Bhuiyan
- *
- * Description: In this project, we create a fully functional C++ program that implements a simple database
- * application. Our program will allow us to manage a database of composers and relevant information about them.
- *
- * The features of the program include:
- * - The ability to add a new composer
- * - The ability to rank a composer (i.e., indicate how much we like or dislike the composer's music)
- * - The ability to view all the composers in the database
- * - The ability to view all composers by rank
+ * Description: Class for managing a Composer record.
  */
 
 #include <string>
@@ -57,6 +49,6 @@ private:
     int composer_yob_; //< year of birth
     std::string composer_genre_; //< baroque, classical, romantic, etc.
     std::string fact_;
-    int ranking_;
+    int ranking_; //< an integer between 1 - 10, lower number indicates better rank
 };
 

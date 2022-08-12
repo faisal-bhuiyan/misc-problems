@@ -1,4 +1,4 @@
-// interface.h: Faisal Bhuiyan
+// interface.cpp: Faisal Bhuiyan
 // Description: A function for interacting with a database of Composer records.
 
 // Requirements are as follows:
@@ -98,6 +98,7 @@ void RetrieveComposer(Database& database) {
     std::string l_name;
     std::cin >> l_name;
 
+    // TODO Handle errors appropriately for the GetComposer method
     if (l_name == database.GetComposer(l_name).LastName()) {
         database.GetComposer(l_name).Display();
     }
@@ -148,22 +149,28 @@ void TextInterface(Database& composer_db) {
         std::cin >> input_var;
 
         switch (input_var) {
+        // Quit program
         case 0:
             std::cout << "Quitting..." << std::endl;
             break;
+        // Add a composer record to database
         case 1:
             AddComposer(composer_db);
             break;
+        // Retrieve a composer record from database
         case 2:
             RetrieveComposer(composer_db);
             break;
+        // Change the ranking of an existing composer
         case 3:
             PromoteOrDemote(composer_db);
             break;
+        // Display all composers existing in the database
         case 4:
             std::cout << "Displaying all composers: " << std::endl;
             composer_db.DisplayAll();
             break;
+        // Display list of composers based off ranking
         case 5:
             std::cout << "Displaying all composers by rank: " << std::endl;
             composer_db.DisplayByRank();
