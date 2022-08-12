@@ -1,7 +1,7 @@
 # misc-problems
-A C++ repository for miscellaneous proof of concept code. This repository is basically a sandbox where I store the first-order solutions for a mixed bag of (unrelated) problems and proof-of-concept code for some classes/objects.
+A C++ repository for miscellaneous proof-of-concept (POC) code. This repository is basically a sandbox where I store first-order solutions for a mixed bag of (unrelated) problems and POC code for design of classes/breakdown of a problem. Problems were collected from various sources (references provided in individual files where appropriate), however, the solutions were all implemented by me.
 
 ## Instructions
-- These scripts are all stand-alone, so they should be compiled and run individually.
-- A brief description of what the code does is provided at the top of each file.
+- These scripts are mostly stand-alone, so they should be compiled and run individually. Instructions for compiling C++ source code on Linux environment can be found [here](https://www.cs.fsu.edu/~myers/howto/g++compiling.txt).
+- A brief description of what the code does is provided at the top of each file. READMEs are added for larger projects.
 

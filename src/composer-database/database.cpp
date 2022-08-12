@@ -3,7 +3,8 @@
 #include <algorithm>
 #include <iostream>
 
-Database::Database() : composers_ {} {}
+Database::Database() : composers_ {} {
+}
 
 Composer& Database::AddComposer(std::string first_name, std::string last_name, std::string genre, int yob,
     std::string fact, int ranking) {
@@ -12,12 +13,13 @@ Composer& Database::AddComposer(std::string first_name, std::string last_name, s
 }
 
 Composer&  Database::GetComposer(std::string last_name) {
-    // TODO Throw if the requested name could not be found
     for (auto& c : composers_) {
         if (c.LastName() == last_name) {
             return c;
         }
     }
+
+    throw "Requested composer could not be found!";
 }
 
 void Database::DisplayAll() const {
@@ -30,7 +32,7 @@ void Database::DisplayByRank() {
     std::sort(
         composers_.begin(),
         composers_.end(),
-        [](const Composer& a, const Composer& b) -> bool{ return a.Ranking() < b.Ranking(); }
+        [](const Composer& a, const Composer& b) -> bool { return a.Ranking() < b.Ranking(); }
     );
 
     this->DisplayAll();
