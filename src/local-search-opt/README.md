@@ -1,5 +1,5 @@
 # local-search-optimization
-This repository contains an object-oriented implementation for finding a general solution of the [local search-based optimization problem](https://en.wikipedia.org/wiki/Local_search_(optimization)). To this end, I implemented my proposed solution in C++.
+This repository contains an object-oriented implementation for finding a general solution of the [local search-based optimization problem](https://en.wikipedia.org/wiki/Local_search_(optimization)). Please read thru the **Problem Statement** section to get an overview of the specific problem this project tackles.
 
 ## Instructions
 From the root directory, compile and run the `main.cpp` program: `g++ main.cpp`.
