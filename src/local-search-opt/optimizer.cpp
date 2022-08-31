@@ -36,7 +36,7 @@ T GreedyLocalSearchOptimizer<T>::ChooseNeighbor(const std::unordered_set<T>& nei
     auto it = neighbors.cbegin();
     std::advance(it, rvalue);
 
-    return *(it);
+    return *it;
 }
 
 template <typename T>

@@ -77,7 +77,7 @@ class UniformCostPathFinder : public SteepestDescentLocalSearchOptimizer<T> {
 public:
     UniformCostPathFinder(const std::vector<T>&, T);
 
-    /// Chooses a random member from the neighbors
+    /// Finds the distance between two elements of the search domain
     double Distance(const T& el1, const T& el2) const;
 
     /// Finds an optimum solution

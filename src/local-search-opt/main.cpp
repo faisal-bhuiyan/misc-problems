@@ -51,6 +51,7 @@ std::unordered_set<double> Neighborhood_Double_3(double x) {
     }
 }
 
+// TODO Add unit tests for more primitive data types
 // TODO Add unit tests for different neighborhood functions
 // TODO Add unit tests for additional convex and non-convex functions to test the algorithms
 
