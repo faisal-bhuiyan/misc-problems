@@ -1,6 +1,6 @@
 #include <iostream>
 
-double square(float x) {
+double square(double x) {
     return x * x;
 }
 
