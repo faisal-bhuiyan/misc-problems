@@ -10,7 +10,7 @@ class Participant:
         self.choice = input("{name}, select rock, paper, or scissor: ".format(name = self.name))
         print("{name} selects {choice}".format(name=self.name, choice = self.choice))
 
-    def to_numerical_choice(self):
+    def toNumericalChoice(self):
         switcher = {
             "rock": 0,
             "paper": 1,
@@ -18,7 +18,7 @@ class Participant:
         }
         return switcher[self.choice]
 
-    def increment_point(self):
+    def incrementPoint(self):
         self.points += 1
 
 
@@ -37,20 +37,20 @@ class GameRound:
         p1.choose()
         p2.choose()
 
-        result = self.compare_choices(p1, p2)
+        result = self.compareChoices(p1, p2)
         print(
-            "Round resulted in a {result}".format(result = self.get_result_as_string(result))
+            "Round resulted in a {result}".format(result = self.getResultAsString(result))
         )
 
         if result > 0:
-           p1.increment_point()
+           p1.incrementPoint()
         elif result < 0:
-           p2.increment_point()
+           p2.incrementPoint()
 
-    def compare_choices(self, p1, p2):
-        return self.rules[p1.to_numerical_choice()][p2.to_numerical_choice()]
+    def compareChoices(self, p1, p2):
+        return self.rules[p1.toNumericalChoice()][p2.toNumericalChoice()]
 
-    def get_result_as_string(self, result):
+    def getResultAsString(self, result):
         res = {
             0: "draw",
             1: "win",
@@ -68,13 +68,13 @@ class Game:
     def start(self):
         while not self.end_game:
             GameRound(self.participant, self.second_participant)
-            self.check_end_condition()
+            self.checkEndCondition()
 
-    def check_end_condition(self):
+    def checkEndCondition(self):
         answer = input("Continue game y/n: ")
         if answer == 'y':
             GameRound(self.participant, self.second_participant)
-            self.check_end_condition()
+            self.checkEndCondition()
         else:
             print(
                 "Game ended, {p1name} has {p1points}, and {p2name} has {p2points}"\
