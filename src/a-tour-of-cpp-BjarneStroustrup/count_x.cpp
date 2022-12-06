@@ -12,10 +12,11 @@ int count_x(const char* p, char x) {
     }
 
     int count = 0;
-    for (; *p!=0; ++p) {
+    while (*p) {
         if (*p == x) {
             count++;
         }
+        ++p;
     }
 
     return count;
