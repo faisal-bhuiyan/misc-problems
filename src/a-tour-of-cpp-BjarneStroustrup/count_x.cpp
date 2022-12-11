@@ -18,7 +18,6 @@ int count_x(const char* p, char x) {
         }
         ++p;
     }
-
     return count;
 }
 
