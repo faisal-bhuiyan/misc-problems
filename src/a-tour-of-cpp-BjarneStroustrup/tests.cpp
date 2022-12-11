@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
 
 // a simple function that prompts the user and returns a Boolean indicating the response
 bool accept() {
@@ -33,7 +34,7 @@ bool accept2() {
     }
 }
 
-// A class to hold two-dimensional points
+// A class to hold two-dimensional points (to illustrate the use of action() function)
 class Point {
 public:
     Point(double x=0., double y=0.) : x_(x), y_(y) {
@@ -84,8 +85,33 @@ void action() {
     }
 }
 
+// Introduce a variable in if-statement condition declaration:
+// The purpose of this is to keep the scope of the variable limited to improve readability
+// and minimize errors
+void do_something(std::vector<int>& v) {
+    if (auto n = v.size(); n!= 0) {
+        // ... we get here if n != 0
+    }
+    // ...
+}
+
+// The most common case of the above is testing a variable against 0 or the nullptr:
+// To do that, simply leave out the explicit mention of the condition
+void do_something2(std::vector<int>& v) {
+    // A terser and simpler for of the do_something function above
+    if (auto n = v.size()) {
+        // ... we get here if n != 0
+    }
+    // ...
+}
+
 int main() {
     accept();
     accept2();
+
+    std::vector<int> v {1, 2, 3};
+
+    do_something(v);
+    do_something2(v);
 }
 
