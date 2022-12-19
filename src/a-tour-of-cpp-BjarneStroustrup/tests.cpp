@@ -8,7 +8,7 @@
 // a simple function that prompts the user and returns a Boolean indicating the response
 bool accept() {
     std::cout << "Do you want to proceed? (y or n) \n";    // write question
-    char answer = 0;    // initialize to a value that will not appear on input
+    char answer {0};   // initialize to a value that will not appear on input
     std::cin >> answer;
 
     if (answer == 'y') {
@@ -20,7 +20,7 @@ bool accept() {
 // a second iteration for the accept function using switch
 bool accept2() {
     std::cout << "Do you want to proceed? (y or n) \n";    // write question
-    char answer = 0;    // initialize to a value that will not appear on input
+    char answer {0};    // initialize to a value that will not appear on input
     std::cin >> answer;
 
     switch (answer) {
@@ -98,7 +98,7 @@ void do_something(std::vector<int>& v) {
 // The most common case of the above is testing a variable against 0 or the nullptr:
 // To do that, simply leave out the explicit mention of the condition
 void do_something2(std::vector<int>& v) {
-    // A terser and simpler for of the do_something function above
+    // A terser and simpler form of the do_something function above
     if (auto n = v.size()) {
         // ... we get here if n != 0
     }
