@@ -6,7 +6,12 @@
 #include <set>
 #include <vector>
 
-std::vector<std::string> unique_names(const std::vector<std::string>& names1, const std::vector<std::string>& names2) {
+/*
+ * A simple function to find unique names from a couple of provided vector of strings
+ */
+std::vector<std::string> unique_names(
+    const std::vector<std::string>& names1, const std::vector<std::string>& names2
+) {
     std::set<std::string> unique_names;
 
     for (const auto& name : names1) {
@@ -27,15 +32,13 @@ std::vector<std::string> unique_names(const std::vector<std::string>& names1, co
 }
 
 #ifndef RunTests
-int main()
-{
+int main() {
     std::vector<std::string> names1 = {"Ava", "Emma", "Olivia"};
     std::vector<std::string> names2 = {"Olivia", "Sophia", "Emma"};
 
-    std::vector<std::string> result = unique_names(names1, names2);
-    for(auto element : result) {
-        std::cout << element << ' '; // should print Ava Emma Olivia Sophia
+    std::vector<std::string> result{unique_names(names1, names2)};
+    for (auto element : result) {
+        std::cout << element << ' ';  // should print Ava Emma Olivia Sophia
     }
 }
 #endif
-

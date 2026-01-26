@@ -1,5 +1,5 @@
 // anagrams.cpp: Faisal Bhuiyan
-// Description: How do you check if two strings are anagrams of each other?
+// Description: Check if two strings are anagrams of each other
 
 #include <algorithm>
 #include <iostream>
@@ -21,14 +21,11 @@ int main() {
     std::string string_2 = "womanhitler";
 
     auto result = compare_strings(string_1, string_2);
-
     if (result) {
         std::cout << "Provided strings " << string_1 << ", " << string_2 << " are anagrams!" << "\n";
         return 0;
     }
 
     std::cout << "Provided strings " << string_1 << ", " << string_2 << " are NOT anagrams." << "\n";
-
     return 0;
 }
-
