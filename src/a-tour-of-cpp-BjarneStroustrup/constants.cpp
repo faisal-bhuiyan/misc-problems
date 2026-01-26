@@ -18,14 +18,13 @@ int main() {
      * and for performance. The value of constexpr must be calculated by the compiler.
      */
 
-    constexpr int dmv {17}; // dmv is a named constant
-    int var {17}; // var is not a constant
-    const double sqv = std::sqrt(var); // sqv is a named constant possibly computed @run time
+    constexpr int dmv{17};              // dmv is a named constant
+    int var{17};                        // var is not a constant
+    const double sqv = std::sqrt(var);  // sqv is a named constant possibly computed @run time
 
-    double sum(const std::vector<double>&); // sum will not modify its argument
+    double sum(const std::vector<double>&);  // sum will not modify its argument
 
-    std::vector<double> v {1.2, 3.4, 4.6}; // v is not a constant
+    std::vector<double> v{1.2, 3.4, 4.6};  // v is not a constant
     // const double s1 = sum(v); // OK: sum(v) is evaluated @run time
     // constexpr double s2 = sum(v); // error: sum(v) is not a constant expression
 }
-

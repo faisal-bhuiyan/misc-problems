@@ -1,8 +1,9 @@
 // count_x.cpp: Faisal Bhuiyan
 // Description: An example to demonstrate the utility of nullptr
 
-#include <iostream>
 #include <string.h>
+
+#include <iostream>
 
 /*
  * nullptr in C++:
@@ -21,7 +22,7 @@ int count_x(const char* p, char x) {
         return 0;
     }
 
-    int count {0};
+    int count{0};
     // Loop will execute as long as p is not a nullptr
     while (*p) {
         if (*p == x) {
@@ -42,8 +43,7 @@ int count_x(const char* p, char x) {
 
 int main() {
     char str[] = {"hello world!"};
-    char ch {'h'};
+    char ch{'h'};
     auto n = count_x(str, ch);
     std::cout << "Number of times '" << ch << "' appears in \"" << str << "\" is: " << n << "\n";
 }
-

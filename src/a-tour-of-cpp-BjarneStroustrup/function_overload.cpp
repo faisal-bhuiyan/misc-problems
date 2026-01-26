@@ -4,9 +4,9 @@
 #include <iostream>
 #include <string>
 
-void print(int);            // takes an integer argument
-void print(double);         // takes a floating point argument
-void print(std::string);    // takes a string argument
+void print(int);          // takes an integer argument
+void print(double);       // takes a floating point argument
+void print(std::string);  // takes a string argument
 
 void print(int i) {
     std::cout << "Provided integer: " << i << "\n";
@@ -21,12 +21,11 @@ void print(std::string s) {
 }
 
 void user() {
-    print(42);          // calls print(int)
-    print(9.65);        // calls print(double)
-    print("Barcelona"); // calls print(string)
+    print(42);           // calls print(int)
+    print(9.65);         // calls print(double)
+    print("Barcelona");  // calls print(string)
 }
 
-int main(){
+int main() {
     user();
 }
-

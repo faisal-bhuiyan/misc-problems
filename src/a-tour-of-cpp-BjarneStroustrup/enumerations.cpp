@@ -10,15 +10,23 @@
  * Enumerations are used to represent small sets of integer values. They are used to
  * make code more readable and less error-prone than it would have been had the symbolic
  * and mnemonic enumerator names not been used.
-*/
+ */
 
-enum class Color { red, green, blue };
-enum class TrafficLight { green, yellow, red };
+enum class Color {
+    red,
+    green,
+    blue
+};
+enum class TrafficLight {
+    green,
+    yellow,
+    red
+};
 
 // By default, an enum class has only assignment, initialization, and comparisons (e.g. == and <)
 // defined. However, an enumeration is a user-defined type, so we can define operators for it.
 TrafficLight& operator++(TrafficLight& t) {
-    switch(t) {
+    switch (t) {
         case TrafficLight::green: {
             return t = TrafficLight::yellow;
         }
@@ -36,7 +44,7 @@ int main() {
     // that its enumerators are scoped
     // Color x = red; // error: which red?
     // Color y = TrafficLight::red; // error: red is not a Color
-    Color z = Color::red; // ok
+    Color z = Color::red;  // ok
 
     // Similarly, we cannot implicitly mix Color and integer values
     // int i = Color::red; // error: Color::Red is not an int
@@ -45,4 +53,3 @@ int main() {
     auto current_signal = TrafficLight::red;
     auto next_signal = ++current_signal;
 }
-
