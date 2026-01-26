@@ -5,10 +5,14 @@
 #include <iostream>
 #include <set>
 #include <string>
+#include <vector>
 
+/*
+ * A simple function to find all occurrences of a character in a string
+ */
 std::vector<std::string::iterator> FindAll(std::string& s, char c) {
     std::vector<std::string::iterator> res;
-    for (auto p = s.begin(); p!= s.end(); ++p) {
+    for (auto p = s.begin(); p != s.end(); ++p) {
         if (*p == c) {
             res.push_back(p);
         }
@@ -16,7 +20,7 @@ std::vector<std::string::iterator> FindAll(std::string& s, char c) {
     return res;
 }
 
-int main () {
+int main() {
     // input
     std::string string1 = "hello world";
     std::string string2 = "bye world";
@@ -33,7 +37,8 @@ int main () {
 
     for (const auto& c : provided_string) {
         if (std::find(tested.begin(), tested.end(), c) == tested.end()) {
-            if (std::find(provided_string.begin() + count, provided_string.end(), c) != provided_string.end()) {
+            if (std::find(provided_string.begin() + count, provided_string.end(), c) !=
+                provided_string.end()) {
                 std::cout << "Duplicated character: " << c << "\n";
                 duplicate.push_back(c);
             }
@@ -56,4 +61,3 @@ int main () {
         }
     }
 }
-

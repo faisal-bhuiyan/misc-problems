@@ -3,8 +3,6 @@
 
 #include <iostream>
 
-using namespace std;
-
 /*
  * A simple class to keep track of time in HH:MM:SS format
  * Limitations: Meant to keep wallclock time - no concept of time beyond hours (e.g. days missing).
@@ -79,14 +77,13 @@ void Time::decrement() {
 }
 
 void Time::display() const {
-    cout << (hours_ % 12 ? hours_ % 12 : 12) << ':' << (minutes_ < 10 ? "0" : "") << minutes_ << ':'
-        << (seconds_ < 10 ? "0" : "") << seconds_ << (hours_ < 12 ? " AM" : " PM") << endl;
+    std::cout << (hours_ % 12 ? hours_ % 12 : 12) << ':' << (minutes_ < 10 ? "0" : "") << minutes_
+              << ':' << (seconds_ < 10 ? "0" : "") << seconds_ << (hours_ < 12 ? " AM" : " PM")
+              << std::endl;
 }
 
 Time ElapsedTime(const Time& start, const Time& finish) {
-    int sec {0},
-        min {0},
-        hr {0};
+    int sec{0}, min{0}, hr{0};
 
     sec = finish.Seconds() - start.Seconds();
     if (sec < 0) {
@@ -110,7 +107,7 @@ Time ElapsedTime(const Time& start, const Time& finish) {
 
 int main() {
     Time timer1;
-    timer1.set(23,59,58);
+    timer1.set(23, 59, 58);
 
     for (int i = 0; i < 5; i++) {
         timer1.increment();
@@ -125,7 +122,6 @@ int main() {
     }
 
     auto elapsed = ElapsedTime(timer2, timer1);
-    cout << "Elapsed time: " << elapsed.Hours() << " hours, " << elapsed.Minutes() << " minutes, " <<
-        elapsed.Seconds() << " seconds" << "\n";
+    std::cout << "Elapsed time: " << elapsed.Hours() << " hours, " << elapsed.Minutes()
+              << " minutes, " << elapsed.Seconds() << " seconds" << "\n";
 }
-

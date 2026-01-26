@@ -1,8 +1,9 @@
 // missing_int.cpp: Faisal Bhuiyan
-// Description: How do you find the missing number in a given integer array of 1 to 100?
+// Description: Find the missing number in a given integer array of 1 to 100
 
 #include <algorithm>
 #include <iostream>
+#include <vector>
 
 int main() {
     std::vector<int> arr(100);
@@ -19,7 +20,7 @@ int main() {
     }
 
     // Solution - assuming only 1 int is missing
-    for (int i = 1; i<= 100; i++) {
+    for (int i = 1; i <= 100; i++) {
         auto member = std::find(arr.begin(), arr.end(), i);
 
         if (member == arr.end()) {
@@ -28,4 +29,3 @@ int main() {
         }
     }
 }
-
