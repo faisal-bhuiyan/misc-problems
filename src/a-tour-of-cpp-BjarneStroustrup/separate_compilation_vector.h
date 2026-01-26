@@ -37,7 +37,6 @@ public:
     size_t size() const;
 
 private:
-    size_t sz;       // number of elements
-    double* elem;    // pointer to elements
+    size_t sz;     // number of elements
+    double* elem;  // pointer to elements
 };
-

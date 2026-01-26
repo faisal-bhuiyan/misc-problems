@@ -1,5 +1,7 @@
-// calc_square.cpp: Faisal Bhuiyan
-// Description: A super simple function to get the square of a number and print it
+/*
+ * calc_square.cpp: Faisal Bhuiyan
+ * Description: A super simple function to get the square of a number and print it
+ */
 
 #include <iostream>
 
@@ -14,4 +16,3 @@ void print_square(double x) {
 int main() {
     print_square(10.50);
 }
-
