@@ -1,16 +1,17 @@
+#include <chrono>
 #include <iostream>
 #include <vector>
-#include <chrono>
+
 #include <omp.h>
 
 // Function to multiply two matrices
-void multiply_matrices(const std::vector<std::vector<double>>& A,
-                       const std::vector<std::vector<double>>& B,
-                       std::vector<std::vector<double>>& C)
-{
+void multiply_matrices(
+    const std::vector<std::vector<double>>& A, const std::vector<std::vector<double>>& B,
+    std::vector<std::vector<double>>& C
+) {
     int N = A.size();
 
-    #pragma omp parallel for
+#pragma omp parallel for
     for (int i = 0; i < N; ++i) {
         for (int j = 0; j < N; ++j) {
             C[i][j] = 0.0;
@@ -21,8 +22,7 @@ void multiply_matrices(const std::vector<std::vector<double>>& A,
     }
 }
 
-int main()
-{
+int main() {
     // Set up OpenMP
     int num_threads = 4;
     omp_set_num_threads(num_threads);
