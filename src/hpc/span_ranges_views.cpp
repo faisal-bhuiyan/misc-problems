@@ -209,7 +209,7 @@ void example_views() {
     auto first4 = v | std::views::take(4);
     auto mid4 = v | std::views::drop(4) | std::views::take(4);
 
-    // iota view —> generates indices lazily; no vector allocation
+    // iota view —> generates indices lazily i.e. no vector allocation
     auto squares = std::views::iota(0, 16) | std::views::transform([](int i) {
                        return i * i;
                    });
