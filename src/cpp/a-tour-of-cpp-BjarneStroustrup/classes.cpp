@@ -23,12 +23,20 @@
 class Vector {
 public:
     // construct a vector
-    Vector(int s) : elem{new double[s]}, sz{s} {}
+    Vector(int s) : elem{new double[s]}, sz{s} {
+        std::cout << "Vector constructor called with size: " << s << "\n";
+    }
+
+    ~Vector() {
+        std::cout << "Vector destructor called\n";
+        delete[] this->elem;
+    }
 
     // element access: subscripting
-    inline double& operator[](size_t i) { return elem[i]; }
+    inline double& operator[](size_t i) const { return elem[i]; }
 
-    inline int size() { return sz; }
+    // return the size of the vector
+    inline int size() const { return sz; }
 
 private:
     int sz;        // number of elements

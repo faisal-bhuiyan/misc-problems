@@ -12,6 +12,7 @@ bool accept() {
     std::cin >> answer;
 
     if (answer == 'y') {
+        std::cout << "You said yes!\n";
         return true;
     }
     return false;
@@ -25,8 +26,10 @@ bool accept2() {
 
     switch (answer) {
         case 'y':
+            std::cout << "You said yes!\n";
             return true;
         case 'n':
+            std::cout << "You said no!\n";
             return false;
         default:
             std::cout << "I'll take that as a no.\n";

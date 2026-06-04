@@ -1,5 +1,6 @@
 // structures.cpp: Faisal Bhuiyan
 // Description: Example code showing use of struct
+// NOTE: Do not run this - it will leak memory!
 
 #include <iostream>
 #include <string>
