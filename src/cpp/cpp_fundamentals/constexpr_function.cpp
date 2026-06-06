@@ -12,16 +12,23 @@
 //   ❌ cannot call non-constexpr functions
 // ============================================================
 
+/*
+ * This function calculates the sum of squares of the first n natural numbers.
+ * It is a constexpr function, so it can be evaluated at compile time.
+ * It can use loops and local variables, but it cannot modify non-local variables.
+ * It cannot call non-constexpr functions.
+ */
 constexpr long long sum_of_squares(int n) {
-    long long total{0};           // local variable  — allowed
-    for (int i = 1; i <= n; i++)  // loop            — allowed
+    long long total{0};             // local variable  — allowed
+    for (int i = 1; i <= n; i++) {  // loop            — allowed
         total += static_cast<long long>(i) * i;
+    }
     return total;
 }
 
 int main() {
     using clock = std::chrono::high_resolution_clock;
-    using us = std::chrono::microseconds;
+    using microseconds = std::chrono::microseconds;
 
     std::cout << "================================================================\n";
     std::cout << "  constexpr function: compile-time vs runtime evaluation  \n";
@@ -33,11 +40,11 @@ int main() {
     constexpr int N{500};
     constexpr long long ct_result{sum_of_squares(N)};  // evaluated at compile time
 
-    // Proof #1: can be used as an array size (requires constant expression)
+    // Proof #1: can be used as an array size -> requires constant expression
     std::array<int, sum_of_squares(4)> arr{};                              // sum_of_squares(4) = 30
     static_assert(sum_of_squares(4) == 30, "1^2 + 2^2 + 3^2 + 4^2 = 30");  // compile-time check
 
-    // Proof #2: static_assert -> only works with constant expressions
+    // Proof #2: static_assert i.e. compile-time check -> only works with constant expressions
     static_assert(ct_result > 0, "ct_result is a compile-time constant");
 
     std::cout << "[COMPILE-TIME] sum_of_squares(" << N << ") = " << ct_result << "\n";
@@ -61,12 +68,12 @@ int main() {
     std::cout << "Results match: " << (ct_result == rt_result ? "YES" : "NO")
               << " (same value, different evaluation time)\n\n";
 
-    // ----------------------------------------------------------
+    // --------------------------------------------------------------------
     // PART 3: Performance measurement
     //
     // volatile int forces the compiler to treat runtime_n as truly
     // unknown — prevents it from optimising the call away
-    // ----------------------------------------------------------
+    // --------------------------------------------------------------------
     const int REPS{200'000};
     long long sink{0};  // accumulate results to prevent dead-code elimination
 
@@ -85,14 +92,14 @@ int main() {
     }
     auto t4{clock::now()};
 
-    auto ct_time{std::chrono::duration_cast<us>(t2 - t1).count()};
-    auto rt_time{std::chrono::duration_cast<us>(t4 - t3).count()};
+    auto ct_time{std::chrono::duration_cast<microseconds>(t2 - t1).count()};
+    auto rt_time{std::chrono::duration_cast<microseconds>(t4 - t3).count()};
 
-    std::cout << "=================================================\n";
-    std::cout << "  Performance (" << REPS << " iterations, N=" << N << ")\n";
-    std::cout << "=================================================\n";
-    std::cout << "  Compile-time constant (load value): " << ct_time << " us\n";
-    std::cout << "  Runtime computation  (loop N=500):  " << rt_time << " us\n";
+    std::cout << "================================================================\n";
+    std::cout << "  Performance (" << REPS << " repetitions, N=" << N << ")\n";
+    std::cout << "================================================================\n\n";
+    std::cout << "  Compile-time constant (load value): " << ct_time << " microseconds\n";
+    std::cout << "  Runtime computation  (loop N=" << N << "):  " << rt_time << " microseconds\n";
 
     // Print the speedup
     if (ct_time > 0) {
