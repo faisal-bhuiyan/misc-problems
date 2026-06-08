@@ -20,7 +20,7 @@
  */
 constexpr long long sum_of_squares(int n) {
     long long total{0};             // local variable  — allowed
-    for (int i = 1; i <= n; i++) {  // loop            — allowed
+    for (int i = 1; i <= n; ++i) {  // loop            — allowed
         total += static_cast<long long>(i) * i;
     }
     return total;
