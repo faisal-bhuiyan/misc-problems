@@ -21,7 +21,7 @@
  *   Circle     — concrete Shape: center + radius
  *   Triangle   — concrete Shape: three vertices, shoelace area
  *   Rectangle  — concrete Shape: center + width + height
- *   Smiley     — multi-level: Smiley → Circle → Shape
+ *   Smiley     — multi-level: Smiley -> Circle -> Shape
  *                owns eye and mouth Shapes via unique_ptr
  *
  * Three additional design points:
@@ -47,13 +47,15 @@ class Point {
 public:
     Point(double x = 0., double y = 0.) : x_{x}, y_{y} {}
 
-    double x() const { return x_; }
-    double y() const { return y_; }
-    void x(double v) { x_ = v; }
-    void y(double v) { y_ = v; }
+    double GetX() const { return this->x_; }
+    double GetY() const { return this->y_; }
+    void SetX(double v) { this->x_ = v; }
+    void SetY(double v) { this->y_ = v; }
 
-    double distance(const Point& p) const {
-        return std::sqrt((x_ - p.x_) * (x_ - p.x_) + (y_ - p.y_) * (y_ - p.y_));
+    double Distance(const Point& p) const {
+        return std::sqrt(
+            (this->x_ - p.x_) * (this->x_ - p.x_) + (this->y_ - p.y_) * (this->y_ - p.y_)
+        );
     }
 
 private:
@@ -62,19 +64,21 @@ private:
 };
 
 inline Point operator+(const Point& a, const Point& b) {
-    return {a.x() + b.x(), a.y() + b.y()};
+    return {a.GetX() + b.GetX(), a.GetY() + b.GetY()};
 }
+
 inline bool operator==(const Point& a, const Point& b) {
-    return std::abs(a.x() - b.x()) < 1e-9 && std::abs(a.y() - b.y()) < 1e-9;
+    return std::abs(a.GetX() - b.GetX()) < 1e-9 && std::abs(a.GetY() - b.GetY()) < 1e-9;
 }
+
 inline bool operator!=(const Point& a, const Point& b) {
     return !(a == b);
 }
 
 // ===============================================================================
-// Shape: abstract base class.
+// Shape: abstract base class (ABC)
 //
-// Contains only pure virtual methods — no data, no constructor.
+// Contains only pure virtual methods — no data and no constructor.
 // virtual ~Shape() is essential: without it, delete through Shape*
 // invokes only ~Shape(), bypassing derived class cleanup entirely.
 // = default is sufficient here since Shape itself holds no resources.
@@ -87,7 +91,7 @@ public:
     virtual void draw() const = 0;
     virtual void rotate(int angle) = 0;
 
-    virtual ~Shape() = default;  // essential — enables correct derived cleanup
+    virtual ~Shape() = default;  // ESSENTIAL —> enables correct derived cleanup
 };
 
 // ===============================================================================
@@ -98,6 +102,8 @@ public:
 // ===============================================================================
 class Circle : public Shape {
 public:
+    static constexpr double kPI{3.14159265358979};
+
     Circle(Point center, double radius) : center_{center}, radius_{radius} {}
 
     Point center() const override { return center_; }
@@ -106,8 +112,8 @@ public:
     void move(Point to) override { center_ = to; }
 
     void draw() const override {
-        std::cout << "    Circle    at (" << center_.x() << ", " << center_.y() << ")  r=" << radius_
-                  << "  area=" << area() << "\n";
+        std::cout << "    Circle    at (" << center_.GetX() << ", " << center_.GetY()
+                  << ")  r=" << radius_ << "  area=" << area() << "\n";
     }
 
     void rotate(int angle) override {
@@ -119,8 +125,6 @@ public:
 protected:
     Point center_;
     double radius_;
-
-    static constexpr double kPI{3.14159265358979};
 };
 
 // ===============================================================================
@@ -130,22 +134,25 @@ protected:
 class Triangle : public Shape {
 public:
     Triangle(Point a, Point b, Point c) : a_{a}, b_{b}, c_{c} {
-        center_ = Point{(a_.x() + b_.x() + c_.x()) / 3., (a_.y() + b_.y() + c_.y()) / 3.};
+        center_ = Point{
+            (a_.GetX() + b_.GetX() + c_.GetX()) / 3.,  // x
+            (a_.GetY() + b_.GetY() + c_.GetY()) / 3.   // y
+        };
     }
 
     Point center() const override { return center_; }
 
     double area() const override {
         // Shoelace formula: |((b-a) × (c-a))| / 2
-        return 0.5 *
-               std::abs(
-                   (b_.x() - a_.x()) * (c_.y() - a_.y()) - (c_.x() - a_.x()) * (b_.y() - a_.y())
-               );
+        return 0.5 * std::abs(
+                         (b_.GetX() - a_.GetX()) * (c_.GetY() - a_.GetY()) -
+                         (c_.GetX() - a_.GetX()) * (b_.GetY() - a_.GetY())
+                     );
     }
 
     void move(Point to) override {
-        const double dx = to.x() - center_.x();
-        const double dy = to.y() - center_.y();
+        const double dx = to.GetX() - center_.GetX();
+        const double dy = to.GetY() - center_.GetY();
         const Point delta{dx, dy};
         a_ = a_ + delta;
         b_ = b_ + delta;
@@ -154,7 +161,7 @@ public:
     }
 
     void draw() const override {
-        std::cout << "    Triangle  at (" << center_.x() << ", " << center_.y()
+        std::cout << "    Triangle  at (" << center_.GetX() << ", " << center_.GetY()
                   << ")  area=" << area() << "\n";
     }
 
@@ -183,8 +190,8 @@ public:
     void move(Point to) override { center_ = to; }
 
     void draw() const override {
-        std::cout << "    Rectangle at (" << center_.x() << ", " << center_.y() << ")  " << width_
-                  << "x" << height_ << "  area=" << area() << "\n";
+        std::cout << "    Rectangle at (" << center_.GetX() << ", " << center_.GetY() << ")  "
+                  << width_ << "x" << height_ << "  area=" << area() << "\n";
     }
 
     void rotate(int angle) override {
@@ -215,20 +222,24 @@ public:
     void set_mouth(std::unique_ptr<Shape> mouth) { mouth_ = std::move(mouth); }
 
     void draw() const override {
-        std::cout << "    Smiley    at (" << center_.x() << ", " << center_.y() << ")  r=" << radius_
-                  << "  eyes=" << eyes_.size() << "\n";
-        for (const auto& e : eyes_)
+        std::cout << "    Smiley    at (" << center_.GetX() << ", " << center_.GetY()
+                  << ")  r=" << radius_ << "  eyes=" << eyes_.size() << "\n";
+        for (const auto& e : this->eyes_) {
             e->draw();
-        if (mouth_)
-            mouth_->draw();
+        }
+        if (mouth_) {
+            this->mouth_->draw();
+        }
     }
 
     void rotate(int angle) override {
         std::cout << "    Smiley    rotated " << angle << " degrees\n";
-        for (auto& e : eyes_)
+        for (auto& e : this->eyes_) {
             e->rotate(angle);
-        if (mouth_)
+        }
+        if (this->mouth_) {
             mouth_->rotate(angle);
+        }
     }
 
     // Traced destructor: shows that virtual dispatch finds ~Smiley()
@@ -253,16 +264,16 @@ private:
 // the concrete type is never exposed beyond this function.
 //
 // Stream format:
-//   0 cx cy r          — Circle
-//   1 x1 y1 x2 y2 x3 y3   — Triangle
-//   2 cx cy w h        — Rectangle
-//   3 cx cy r          — Smiley (eyes and mouth added automatically)
+//   0 cx cy r              — Circle
+//   1 x1 y1 x2 y2 x3 y3    — Triangle
+//   2 cx cy w h            — Rectangle
+//   3 cx cy r              — Smiley (eyes and mouth added automatically)
 // ===============================================================================
 enum class Kind {
-    circle,
-    triangle,
-    rectangle,
-    smiley
+    kCircle = 0,
+    kTriangle = 1,
+    kRectangle = 2,
+    kSmiley = 3
 };
 
 std::unique_ptr<Shape> read_shape(std::istream& is) {
@@ -271,22 +282,22 @@ std::unique_ptr<Shape> read_shape(std::istream& is) {
         return nullptr;
 
     switch (static_cast<Kind>(k)) {
-        case Kind::circle: {
+        case Kind::kCircle: {
             double cx, cy, r;
             is >> cx >> cy >> r;
             return std::make_unique<Circle>(Point{cx, cy}, r);
         }
-        case Kind::triangle: {
+        case Kind::kTriangle: {
             double x1, y1, x2, y2, x3, y3;
             is >> x1 >> y1 >> x2 >> y2 >> x3 >> y3;
             return std::make_unique<Triangle>(Point{x1, y1}, Point{x2, y2}, Point{x3, y3});
         }
-        case Kind::rectangle: {
+        case Kind::kRectangle: {
             double cx, cy, w, h;
             is >> cx >> cy >> w >> h;
             return std::make_unique<Rectangle>(w, h, cx, cy);
         }
-        case Kind::smiley: {
+        case Kind::kSmiley: {
             double cx, cy, r;
             is >> cx >> cy >> r;
             auto face = std::make_unique<Smiley>(Point{cx, cy}, r);
@@ -301,16 +312,18 @@ std::unique_ptr<Shape> read_shape(std::istream& is) {
 }
 
 // ===============================================================================
-// Free functions operating on the Shape interface.
+// Free functions operating on the Shape interface
 // ===============================================================================
-void draw_all(const std::vector<std::unique_ptr<Shape>>& v) {
-    for (const auto& s : v)
+void draw_all(const std::vector<std::unique_ptr<Shape>>& shapes) {
+    for (const auto& s : shapes) {
         s->draw();
+    }
 }
 
-void rotate_all(std::vector<std::unique_ptr<Shape>>& v, int angle) {
-    for (auto& s : v)
+void rotate_all(std::vector<std::unique_ptr<Shape>>& shapes, int angle) {
+    for (auto& s : shapes) {
         s->rotate(angle);
+    }
 }
 
 // ===============================================================================
@@ -332,21 +345,21 @@ void rotate_all(std::vector<std::unique_ptr<Shape>>& v, int angle) {
 // unique_ptr calls delete on the correct derived type via vtable.
 // ===============================================================================
 void user(std::istream& is) {
-    std::vector<std::unique_ptr<Shape>> v;
+    std::vector<std::unique_ptr<Shape>> shapes{};
 
     while (is) {
-        auto s = read_shape(is);
-        if (!s) {
+        auto shape = read_shape(is);
+        if (!shape) {
             break;
         }
-        v.push_back(std::move(s));
+        shapes.push_back(std::move(shape));
     }
 
     std::cout << "\n  draw_all():\n";
-    draw_all(v);
+    draw_all(shapes);
 
     std::cout << "\n  rotate_all(45):\n";
-    rotate_all(v, 45);
+    rotate_all(shapes, 45);
 
     std::cout << "\n  user() returning — v destroyed, all Shapes freed:\n";
     // unique_ptrs destroyed here in reverse order — virtual dtor called on each
@@ -419,13 +432,13 @@ int main() {
     std::cout << "\n=========== VIRTUAL DESTRUCTOR ===========\n";
     std::cout << "  creating Smiley, assigning to Shape*:\n";
     {
-        Shape* ps = new Smiley{Point{0, 0}, 10};
-        static_cast<Smiley*>(ps)->add_eye(std::make_unique<Circle>(Point{-3, 3}, 2));
-        static_cast<Smiley*>(ps)->add_eye(std::make_unique<Circle>(Point{3, 3}, 2));
+        Shape* ps = new Smiley{Point{0., 0.}, 10.};
+        static_cast<Smiley*>(ps)->add_eye(std::make_unique<Circle>(Point{-3., 3.}, 2.));
+        static_cast<Smiley*>(ps)->add_eye(std::make_unique<Circle>(Point{3., 3.}, 2.));
         std::cout << "  delete ps (through Shape*):\n";
-        delete ps;  // vtable → ~Smiley() → eyes_ freed → ~Circle() → ~Shape()
+        delete ps;  // vtable -> ~Smiley()-> eyes_ freed -> ~Circle() -> ~Shape()
     }
-    std::cout << "  (without virtual dtor, ~Smiley() would have been skipped)\n";
+    std::cout << "  (without virtual dtor, ~Smiley()would have been skipped)\n";
 
     // ----------------------------------------------------------
     // Part 3: dynamic_cast — both pointer and reference forms
@@ -433,10 +446,10 @@ int main() {
     std::cout << "\n=========== DYNAMIC_CAST: HIERARCHY NAVIGATION ===========\n";
     {
         std::vector<std::unique_ptr<Shape>> shapes;
-        shapes.push_back(std::make_unique<Circle>(Point{0, 0}, 5));
-        shapes.push_back(std::make_unique<Triangle>(Point{0, 0}, Point{3, 0}, Point{0, 4}));
+        shapes.push_back(std::make_unique<Circle>(Point{0., 0.}, 5.));
+        shapes.push_back(std::make_unique<Triangle>(Point{0., 0.}, Point{3., 0.}, Point{0., 4.}));
         shapes.push_back(std::make_unique<Rectangle>(6., 3.));
-        shapes.push_back(std::make_unique<Smiley>(Point{1, 1}, 8));
+        shapes.push_back(std::make_unique<Smiley>(Point{1., 1.}, 8.));
 
         for (const auto& s : shapes) {
             inspect_shape(*s);
