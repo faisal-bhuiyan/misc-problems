@@ -326,23 +326,23 @@ int main() {
         Employee e1{"Alice", 1};
         e1.AddProject("Simulation");
         e1.AddProject("Visualisation");
-        // e1 contains: Alice #1  projects: 2
+        // e1 contains: Alice #1, projects: 2
         e1.Print();
 
         std::cout << "\n  copy construction:\n";
-        Employee e2 = e1;  // compiler-generated copy —> correct
+        Employee e2 = e1;  // compiler-generated copy -> correct
         e2.AddProject("Extra");
 
-        // e1 contains: Alice #1  projects: 2
-        e1.Print();  // unchanged —> e2 is a genuine deep copy
-        // e2 contains: Alice #1  projects: 3
+        // e1 contains: Alice #1, projects: 2
+        e1.Print();  // unchanged -> e2 is a genuine deep copy
+        // e2 contains: Alice #1, projects: 3
         e2.Print();
 
         std::cout << "\n  move construction:\n";
-        Employee e3 = std::move(e2);  // compiler-generated move — correct
-        // e3 contains: Alice #1  projects: 3
+        Employee e3 = std::move(e2);  // compiler-generated move —> correct
+        // e3 contains: Alice #1, projects: 3
         e3.Print();
-        // e2 contains: empty i.e. moved-from state
+        // e2 contains: empty -> moved-from state
         e2.Print();
     }
 
