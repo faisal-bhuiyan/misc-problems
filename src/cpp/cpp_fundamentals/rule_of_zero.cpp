@@ -434,6 +434,5 @@ int main() {
         ProcessMatrix(m1);         // ✅ pass existing Matrix
         ProcessMatrix(Matrix{5});  // ✅ explicit temporary — intent is clear
     }
-
     return 0;
 }
