@@ -290,7 +290,7 @@ int main() {
     }
 
     // ----------------------------------------------------------
-    // Part 2: Rule of Five — matched set, correct behaviour
+    // Part 2: Rule of Five — matched set, correct behavior
     // ----------------------------------------------------------
     std::cout << "\n=========== RULE OF FIVE — MATCHED SET ===========\n";
 

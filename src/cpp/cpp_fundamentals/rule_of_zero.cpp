@@ -25,7 +25,7 @@
  * The danger of defining some but not all: if you define a destructor, the
  * compiler still generates copy operations — but they do a shallow memberwise
  * copy of raw pointers. Two objects then believe they own the same memory.
- * The destructor fires twice: undefined behaviour.
+ * The destructor fires twice: undefined behavior.
  *
  * = default: explicitly request the compiler-generated version. Communicates
  *            intent and can restore a defaulted operation that would otherwise

@@ -28,7 +28,7 @@
  * Without the copy and move operations, the compiler generates memberwise
  * copies — which would copy the raw pointer, leaving two Vectors believing
  * they own the same memory. The destructor would then call delete[] twice:
- * undefined behaviour.
+ * undefined behavior.
  *
  * Vector obeys the same rules for naming, scope, allocation, and lifetime
  * as a built-in type. The established class invariant is:
