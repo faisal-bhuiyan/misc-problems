@@ -13,20 +13,20 @@ __global__ void add(int n, float* x, float* y) {
 }
 
 int main(void) {
-    int N = 1 << 20;
+    int N = 1 << 20;  // 1 million elements
     float *x, *y;
 
-    // Allocate Unified Memory – accessible from CPU or GPU
+    // Allocate Unified Memory –> accessible from CPU or GPU
     cudaMallocManaged(&x, N * sizeof(float));
     cudaMallocManaged(&y, N * sizeof(float));
 
-    // initialize x and y arrays on the host
+    // initialize x and y arrays on the host --> 1.0f and 2.0f
     for (int i = 0; i < N; i++) {
         x[i] = 1.0f;
         y[i] = 2.0f;
     }
 
-    // Run kernel on 1M elements on the GPU
+    // Run kernel on 1M elements on the GPU -> 1 thread, 1 block
     add<<<1, 1>>>(N, x, y);
 
     // Wait for GPU to finish before accessing on host
@@ -52,8 +52,8 @@ int main(void) {
 
 // Kernel function to add the elements of two arrays
 __global__ void add(int n, float* x, float* y) {
-    int index = blockIdx.x * blockDim.x + threadIdx.x;
-    int stride = blockDim.x * gridDim.x;
+    int index = blockIdx.x * blockDim.x + threadIdx.x;  // thread index
+    int stride = blockDim.x * gridDim.x;                // stride
     for (int i = index; i < n; i += stride) {
         y[i] = x[i] + y[i];
     }
@@ -74,8 +74,8 @@ int main(void) {
     }
 
     // Run kernel on 1M elements on the GPU
-    int blockSize = 256;
-    int numBlocks = (N + blockSize - 1) / blockSize;
+    int blockSize = 256;                              // 256 threads per block
+    int numBlocks = (N + blockSize - 1) / blockSize;  // number of blocks -> ceil(N / blockSize)
     add<<<numBlocks, blockSize>>>(N, x, y);
 
     // Wait for GPU to finish before accessing on host
