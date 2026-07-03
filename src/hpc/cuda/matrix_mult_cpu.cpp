@@ -33,14 +33,14 @@ int main() {
     constexpr int N = 4;  // matrix dimension: N×N
 
     // A is a 4×4 matrix with values 1->16, stored row by row
-    float A[N * N] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
+    float A[N * N] = {1., 2., 3., 4., 5., 6., 7., 8., 9., 10., 11., 12., 13., 14., 15., 16.};
 
-    // B is the 4×4 identity matrix (1s on the diagonal, 0s elsewhere)
+    // B is a 4×4 identity matrix
     // Multiplying any matrix by the identity returns the original: A * I = A
     // This makes verification trivial -> C should equal A exactly
-    float B[N * N] = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
+    float B[N * N] = {1., 0., 0., 0., 0., 1., 0., 0., 0., 0., 1., 0., 0., 0., 0., 1.};
 
-    // Zero-initialize C -> the = {} syntax value-initializes all elements to 0
+    // Zero-initialize C
     float C[N * N] = {};
 
     matmul_cpu(N, A, B, C);
@@ -50,6 +50,6 @@ int main() {
         for (int col = 0; col < N; ++col) {
             std::cout << C[row * N + col] << " ";
         }
-        std::cout << '\n';  // newline after each row
+        std::cout << '\n';
     }
 }
