@@ -5,6 +5,34 @@
 #include <unordered_set>
 #include <vector>
 
+/*
+ * Most important problems for interviews:
+ *
+ * *** TwoSum: Creating hashmap (std::unordered_map) to keep track of {value -> index} mapping in an
+ * array
+ *
+ * *** Fibonacci: Incremental solution vs. recursive solution to get the n-th value of the Fibonacci
+ * series
+ *
+ * *** Linked list reversal: reverse a linked list (incremental solution vs. recursive solution)
+ *
+ * *** Merge intervals: merge overlapping intervals in a list of intervals -> sorting and then
+ * merging 1D intervals
+ *
+ * *** DFS/BFS: depth-first search/breadth-first search -> Core graph traversal algorithms
+ *
+ * ** Binary/bisection search: find the index of the target in the sorted vector nums -> two pointers
+ * technique
+ *
+ * * sqrt(x): find the integer square root of a given integer x -> Newton's method to get quadratic
+ * solution
+ *
+ * * Palindrome: check if a vector reads the same forwards and backwards -> two pointers technique
+ *
+ * * Rotate matrix: rotate an n x n matrix 90 degrees clockwise in-place -> transpose and then
+ * reflect
+ */
+
 std::vector<int> flatten(const std::vector<std::vector<int>>& nested) {
     std::vector<int> res{};
     for (const auto& vec : nested) {
@@ -30,6 +58,10 @@ std::vector<int> runningSum(const std::vector<int>& nums) {
     return res;
 }
 
+//---------------------------------------------------------------------------
+// Binary search
+//---------------------------------------------------------------------------
+// Binary search: find the index of the target in the sorted vector nums
 int binarySearch(const std::vector<int>& nums, int target) {
     // nums is empty
     if (nums.empty()) {
@@ -54,6 +86,7 @@ int binarySearch(const std::vector<int>& nums, int target) {
             high = mid - 1;
         }
     }
+    // target is not present within nums
     return -1;
 }
 
@@ -101,6 +134,9 @@ bool isPrime(int n) {
     return true;
 }
 
+//---------------------------------------------------------------------------
+// TwoSum
+//---------------------------------------------------------------------------
 std::pair<int, int> twoSum(const std::vector<int>& nums, int target) {
     // This is a classic hashmap problem -> in C++ we need std::unordered_map
     std::unordered_map<int, int> hashmap{};
@@ -117,6 +153,9 @@ std::pair<int, int> twoSum(const std::vector<int>& nums, int target) {
     return {};
 }
 
+//---------------------------------------------------------------------------
+// Integer square root
+//---------------------------------------------------------------------------
 int isqrt(int n) {
     if (n == 0) {
         return 0;
@@ -130,7 +169,10 @@ int isqrt(int n) {
     return sq_root;
 }
 
-// Calculate the n-th value of fibonacchi series
+//---------------------------------------------------------------------------
+// Fibonacci
+//---------------------------------------------------------------------------
+// Calculate the n-th value of Fibonacci series
 // int fibonacci(int n) {
 //     // base cases
 //     if (n == 0) {
@@ -199,6 +241,9 @@ int main() {
     return 0;
 }
 
+//---------------------------------------------------------------------------
+// First duplicate
+//---------------------------------------------------------------------------
 // Return the first element that appears more than once. If no duplicate exists, return -1.
 int firstDuplicate(const std::vector<int>& nums) {
     // We don't need a map here since index is not required just the value -> use unordered set
@@ -243,6 +288,9 @@ int firstDuplicate(const std::vector<int>& nums) {
 //     return 0;
 // }
 
+//---------------------------------------------------------------------------
+// Palindrome
+//---------------------------------------------------------------------------
 // Return true if the vector reads the same forwards and backwards.
 bool isPalindrome(const std::vector<int>& nums) {
     // empty vector
@@ -289,6 +337,9 @@ bool isPalindrome(const std::vector<int>& nums) {
 //     return 0;
 // }
 
+//---------------------------------------------------------------------------
+// Missing number
+//---------------------------------------------------------------------------
 // Given a vector containing n distinct numbers in the range [0, n], return the one number that is
 // missing.
 // Hint: think about what the sum of [0, n] should be.
@@ -330,6 +381,9 @@ int missingNumber(const std::vector<int>& nums) {
 //     return 0;
 // }
 
+//---------------------------------------------------------------------------
+// Rotate matrix
+//---------------------------------------------------------------------------
 // Rotate an n x n matrix 90 degrees clockwise in-place
 // Hint: think transpose first, then reflect
 void rotateMatrix(std::vector<std::vector<int>>& matrix) {
