@@ -172,30 +172,31 @@ int isqrt(int n) {
 //---------------------------------------------------------------------------
 // Fibonacci
 //---------------------------------------------------------------------------
-// Calculate the n-th value of Fibonacci series
-// int fibonacci(int n) {
+// Calculate the n-th value of Fibonacci series - incremental soln O(n) time complexity and O(1)
+// space complexity
+//  int fibonacci(int n) {
 //     // base cases
-//     if (n == 0) {
+//     if (n <= 0) {
 //         return 0;
 //     }
 //     if (n == 1) {
 //         return 1;
 //     }
 
-//     // general case as an incremental solution
-//     int fib{1};
+//     // incremental case
+//     int fib_current{1};
 //     int fib_prev{0};
 //     for (int i = 2; i <= n; ++i) {
-//         int tmp = fib;
-//         fib += fib_prev;
-//         fib_prev = tmp;
+//         int temp = fib_current;
+//         fib_current += fib_prev;
+//         fib_prev = temp;
 //     }
-//     return fib;
+//     return fib_current;
 // }
 
-// V1.02: Fibonacci series
+// Fibonacci series - recursive soln O(2^n) time complexity
 int fibonacci(int n) {
-    // base cases
+    // base case
     if (n <= 0) {
         return 0;
     }
@@ -203,15 +204,8 @@ int fibonacci(int n) {
         return 1;
     }
 
-    // incremental case
-    int fib_current{1};
-    int fib_prev{0};
-    for (int i = 2; i <= n; ++i) {
-        int temp = fib_current;
-        fib_current += fib_prev;
-        fib_prev = temp;
-    }
-    return fib_current;
+    // recursive case
+    return fibonacci(n - 1) + fibonacci(n - 2);
 }
 
 int main() {
