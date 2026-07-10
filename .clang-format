@@ -67,7 +67,7 @@ IncludeCategories:
     Priority: 40
 
   # This project's h files
-  - Regex:    '^"(src|tests|Kynema)'
+  - Regex:    '^"(misc-problems)'
     Priority: 60
 
   # Other libraries' h files (with quotes)
