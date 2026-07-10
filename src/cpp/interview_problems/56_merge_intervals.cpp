@@ -52,25 +52,24 @@ public:
 };
 
 // version 1.01: Solved during interview
-//
-// class Solution {
-// public:
-//     vector<vector<int>> merge(vector<vector<int>>& intervals) {
-//         std::sort(intervals.begin(), intervals.end());
-//         std::vector<std::vector<int>> non_overlapping_intervals{{intervals[0][0],
-//         intervals[0][1]}}; for (auto i = 1; i < intervals.size(); ++i) {
-//             if (non_overlapping_intervals.back()[0] <= intervals[i][0] &&
-//             non_overlapping_intervals.back()[1] >= intervals[i][0]) {
-//                 if (non_overlapping_intervals.back()[1] <= intervals[i][1]) {
-//                     non_overlapping_intervals.back()[1] = intervals[i][1];
-//                 }
-//             } else {
-//                 non_overlapping_intervals.emplace_back(intervals[i]);
-//             }
-//         }
-//         return non_overlapping_intervals;
-//     }
-// };
+class Solution {
+public:
+    vector<vector<int>> merge(vector<vector<int>>& intervals) {
+        std::sort(intervals.begin(), intervals.end());
+        std::vector<std::vector<int>> non_overlapping_intervals{{intervals[0][0], intervals[0][1]}};
+        for (auto i = 1; i < intervals.size(); ++i) {
+            if (non_overlapping_intervals.back()[0] <= intervals[i][0] &&
+                non_overlapping_intervals.back()[1] >= intervals[i][0]) {
+                if (non_overlapping_intervals.back()[1] <= intervals[i][1]) {
+                    non_overlapping_intervals.back()[1] = intervals[i][1];
+                }
+            } else {
+                non_overlapping_intervals.emplace_back(intervals[i]);
+            }
+        }
+        return non_overlapping_intervals;
+    }
+};
 
 // version 1.00: Brute force solution O(n^2)
 // According to HM, the brute force soln for this problem is harder than the O(nlogn) soln

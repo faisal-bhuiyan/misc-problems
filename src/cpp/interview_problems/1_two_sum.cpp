@@ -8,7 +8,6 @@
  * You can return the answer in any order.
 
  * Example 1:
-
  * Input: nums = [2,7,11,15], target = 9
  * Output: [0,1]
  * Explanation: Because nums[0] + nums[1] == 9, we return [0, 1].
@@ -59,21 +58,21 @@ public:
 };
 
 // version 1.00: Solution from Neetcode video
-// class Solution {
-// public:
-//     vector<int> twoSum(vector<int>& nums, int target) {
-//         // create a hash map to store value -> index of the vector nums
-//         std::unordered_map<int, int> index_map{};
-//         for (int index_i=0; index_i < nums.size(); ++index_i) {
-//             // we are looking for following needle in nums
-//             auto needle = target - nums[index_i];
-//             // found the needle, let's return the indices
-//             if (auto search = index_map.find(needle); search != index_map.end()) {
-//                 return {index_i, index_map[needle]};
-//             }
-//             // did not find needle, add element to hash map
-//             index_map[nums[index_i]] = index_i;
-//         }
-//         return {};
-//     }
-// };
+class Solution {
+public:
+    vector<int> twoSum(vector<int>& nums, int target) {
+        // create a hash map to store value -> index of the vector nums
+        std::unordered_map<int, int> index_map{};
+        for (int index_i = 0; index_i < nums.size(); ++index_i) {
+            // we are looking for following needle in nums
+            auto needle = target - nums[index_i];
+            // found the needle, let's return the indices
+            if (auto search = index_map.find(needle); search != index_map.end()) {
+                return {index_i, index_map[needle]};
+            }
+            // did not find needle, add element to hash map
+            index_map[nums[index_i]] = index_i;
+        }
+        return {};
+    }
+};

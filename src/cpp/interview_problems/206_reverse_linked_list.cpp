@@ -54,25 +54,25 @@ public:
 };
 
 // version 1.01: Recursive solution (not because it's faster but it came up during an inteview)
-// class Solution {
-// public:
-//     ListNode* RecursiveLinkedListReversal(ListNode* current, ListNode* prev) {
-//         // base case
-//         if (current == nullptr) {
-//             return prev;
-//         }
+class Solution {
+public:
+    ListNode* RecursiveLinkedListReversal(ListNode* current, ListNode* prev) {
+        // base case
+        if (current == nullptr) {
+            return prev;
+        }
 
-//         // recursive case
-//         auto next = current->next;
-//         current->next = prev;
-//         return RecursiveLinkedListReversal(next, current);
-//     }
+        // recursive case
+        auto next = current->next;
+        current->next = prev;
+        return RecursiveLinkedListReversal(next, current);
+    }
 
-//     ListNode* reverseList(ListNode* head) {
-//         // Degenerate case: empty linked list
-//         if (head == nullptr) {
-//             return head;
-//         }
-//         return RecursiveLinkedListReversal(head, nullptr);
-//     }
-// };
+    ListNode* reverseList(ListNode* head) {
+        // Degenerate case: empty linked list
+        if (head == nullptr) {
+            return head;
+        }
+        return RecursiveLinkedListReversal(head, nullptr);
+    }
+};
