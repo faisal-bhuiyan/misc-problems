@@ -26,15 +26,17 @@
 #include <algorithm>
 #include <vector>
 
+/*
+ * This is analogous to detecting intersection in 1D intervals,
+ * however more complex due to increased number of ways an intersection
+ * can happen. Following is the logic:
+ * - sort two rectangles by their starting point x coord -> smallest is rec1, larger is rec2
+ * - intersection can happen only if:
+ * - rect2.start must be < than rec1.end (strict inequality)
+ * - rec2.start.y must be >= rec1.start.y (equality is fine here)
+ */
+
 // version 1.01: axis aligned bounding box intersection detection
-// This is analogous to detecting intersection in 1D intervals,
-// however more complex due to increased number of ways an intersection
-// can happen. Following is the logic:
-// - sort two rectangles by their starting point x coord -> smallest is rec1, >= is rec2
-// - intersection can happen only if:
-// - rect2.start must be < than rec1.end (strict inequality)
-// - rec2.start.y must be >= rec1.start.y (equality is fine here)
-//
 class Solution {
 public:
     bool isRectangleOverlap(vector<int>& rec1, vector<int>& rec2) {

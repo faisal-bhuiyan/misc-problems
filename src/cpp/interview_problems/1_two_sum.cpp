@@ -1,12 +1,12 @@
 /*
  * Given an array of integers nums and an integer target, return indices of the two numbers such that
  * they add up to target.
-
+ *
  * You may assume that each input would have exactly one solution, and you may not use the same
  * element twice.
  *
  * You can return the answer in any order.
-
+ *
  * Example 1:
  * Input: nums = [2,7,11,15], target = 9
  * Output: [0,1]
@@ -23,6 +23,32 @@
 
 #include <unordered_map>
 #include <vector>
+
+/*
+ * Commentary on the solution:
+ * - This is a really classic hashmap problem given in interviews. I have seen this question come up
+ *   in one interview myself.
+ *
+ * - The naive and brute force solution is to use two nested loops to check all pairs of numbers in
+ * the array -> O(n^2) time, O(1) space.
+ *
+ * - We can do better than this by making the observation that we are trying to find a (key, value)
+ * pair over a hashmap in this problem, where the key -> nums[index] and value -> index.
+ * We can build the hashmap upfront at the cost of O(n) time and space complexity and then perform
+ * a constant-time search for the presence of an element.
+ *
+ * - The smarter approach is to build the hashmap and search at the same time -> we can look for the
+ * target in the existing hashmap by iterating over the elements of nums. If that index matches an
+ * existing element in hashmap, our work is done. If not, we simply add it to the hashmap.
+ *
+ * Time Complexity: O(n)
+ * - We iterate through the array once, and for each element, we perform a constant-time hashmap
+ * lookup.
+ *
+ * Space Complexity: O(n)
+ * - We use a hashmap to store the values and their indices. The space complexity is O(n) in the
+ * worst case, where we need to store all elements in the hashmap.
+ */
 
 // version 1.01: Re-hashing the previous soln just for practice
 class Solution {

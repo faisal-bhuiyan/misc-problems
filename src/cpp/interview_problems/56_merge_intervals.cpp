@@ -22,8 +22,44 @@
 #include <algorithm>
 #include <vector>
 
+/*
+ * Commentary on the solution:
+ * - The core insight for this problem comes from sketching out one concrete example and then
+ * generalizing it.
+ *
+ * - The first insight is that we need to sort the intervals by their starting point. This is because
+ * we need to be able to compare the starting points of the intervals to determine if they overlap.
+ * This is very typical in interval problems -> always sort the intervals by their starting point.
+ *
+ * - The second major insight is the 3 cases that might happen when we are merging intervals:
+ * - Case 1: Overlap detected -> we need to take the largest end point b/w last added and current
+ * interval
+ * - Case 2: No overlap detected -> we need to push the current interval to the results vector
+ * - Case 3: Current interval is completely contained within the last added interval -> we need to do
+ * nothing
+ *
+ * - Sketch of the 3 cases (last = already in result, curr = next interval):
+ *
+ *   Case 1 — overlap / extend:
+ *     last:  |----|
+ *     curr:     |----|
+ *     merge: |-------|     end = max(last.end, curr.end)
+ *
+ *   Case 2 — no overlap:
+ *     last:  |----|
+ *     curr:          |----|
+ *     result: keep last, push curr
+ *
+ *   Case 3 — curr contained in last:
+ *     last:  |--------|
+ *     curr:    |--|
+ *     merge: |--------|    end unchanged (max keeps last.end)
+ *
+ * Note: Case 3 is a special case of Case 1; one branch with
+ *   last.end = max(last.end, curr.end) covers both.
+ */
+
 // version 1.02: Some enhancements to the interview soln
-//
 class Solution {
 public:
     vector<vector<int>> merge(vector<vector<int>>& intervals) {
