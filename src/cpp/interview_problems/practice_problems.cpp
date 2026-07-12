@@ -453,3 +453,37 @@ void rotateMatrix(std::vector<std::vector<int>>& matrix) {
 //     std::cout << passed << "/" << tests.size() << " tests passed\n";
 //     return 0;
 // }
+
+//---------------------------------------------------------------------------
+// Pascal's Triangle
+//---------------------------------------------------------------------------
+
+// Let's try an iterative soln first
+class Solution {
+public:
+    vector<vector<int>> generate(int numRows) {
+        // base case
+        if (numRows == 0) {
+            return {};
+        }
+        if (numRows == 1) {
+            return {{1}};
+        }
+
+        // iterative case
+        vector<vector<int>> pascals_triangle{{1}};
+        for (size_t i = 1; i < numRows; ++i) {
+            // compute the next row in pascals triangle
+            vector<int> row(i + 1);
+            // first and last elements of each row are always 1
+            row[0] = 1;
+            row[i] = 1;
+            for (size_t j = 1; j < i; ++j) {
+                // each element is the sum of the two elements above it
+                row[j] = pascals_triangle[i - 1][j - 1] + pascals_triangle[i - 1][j];
+            }
+            pascals_triangle.emplace_back(row);
+        }
+        return pascals_triangle;
+    }
+};
