@@ -1,44 +1,45 @@
-# Strategy → Policy-Based Design: A C++ Tutorial
+# From Strategy to Policy-Based Design in C++
 
-## Part 1 — The problem Strategy solves
+## Part 1 — The problem addressed by Strategy
 
-Every version of this pattern — GoF's runtime Strategy, Alexandrescu's policy-based
-design — answers the same question:
+The runtime Strategy pattern described by the Gang of Four and compile-time
+policy-based design address the same design question:
 
-> **A class has one algorithm that varies, and everything else about the class stays
-> the same. How do you let the algorithm vary without rewriting the class for every
-> variant?**
+> A class performs an operation whose implementation may vary, while the remainder
+> of the class remains stable. How can that variation be introduced without
+> duplicating or repeatedly modifying the class?
 
-Concretely, in your world: you might want a `Point`-to-`Point` distance function that
-sometimes means Euclidean distance and sometimes means Manhattan distance, or a
-tolerance check that's sometimes a fixed epsilon and sometimes scaled to the model's
-bounding box. The *shape* of the operation is the same everywhere it's used; only the
-*rule* changes.
+For example, a point-to-point distance operation may use either Euclidean or
+Manhattan distance. Similarly, a geometric predicate may use either a fixed
+tolerance or one derived from the scale of the model. In each case, the operation
+has a stable interface, but its implementation varies.
 
-Without a pattern, you get one of two bad outcomes:
-- A giant `if (mode == kEuclidean) ... else if (mode == kManhattan) ...` branch
-  duplicated at every call site, or
-- A class that hardcodes one specific rule, forcing a full rewrite (or copy-paste
-  fork) every time a new rule shows up.
+Without an explicit variation point, code commonly develops one of two problems:
+- conditionals such as `if (mode == kEuclidean) ... else if (...)` become
+  duplicated across call sites; or
+- a class hard-codes one implementation and must be modified or copied whenever
+  another implementation is required.
 
-Strategy — in either its runtime or compile-time form — extracts "the rule that
-varies" into its own first-class thing, and has the surrounding code depend on *that*
-instead of hardcoding it.
+Both designs separate the varying operation from the code that uses it. The
+surrounding class depends on a defined interface rather than on a particular
+implementation.
 
 ---
 
-## Part 2 — Classic Strategy (runtime, GoF form)
+## Part 2 — Classic Strategy: runtime polymorphism
 
-The textbook version: define an abstract interface for the varying behavior, and
-inject a concrete implementation at runtime.
+The classic Strategy pattern defines an abstract interface for the varying
+operation and supplies a concrete implementation at runtime.
 
 ```cpp
 #include <memory>
 #include <cmath>
+#include <utility>
+#include <vector>
 
 struct Point { double x{}, y{}; };
 
-// The "strategy" interface — the thing that varies
+// Interface for the operation that varies.
 class DistanceStrategy {
 public:
     virtual ~DistanceStrategy() = default;
@@ -48,7 +49,7 @@ public:
 class EuclideanDistance : public DistanceStrategy {
 public:
     double Distance(const Point& a, const Point& b) const override {
-        return std::sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
+        return std::hypot(a.x - b.x, a.y - b.y);
     }
 };
 
@@ -59,12 +60,17 @@ public:
     }
 };
 
-// The class that USES a strategy, without knowing which one
+// Context: uses a strategy without depending on a concrete implementation.
 class NearestNeighborFinder {
 public:
     explicit NearestNeighborFinder(std::unique_ptr<DistanceStrategy> strategy)
         : strategy_{std::move(strategy)} {}
 
+    void SetStrategy(std::unique_ptr<DistanceStrategy> strategy) {
+        strategy_ = std::move(strategy);
+    }
+
+    // Precondition: candidates is not empty.
     Point FindNearest(const Point& query, const std::vector<Point>& candidates) const {
         Point best{candidates.front()};
         double best_dist{strategy_->Distance(query, best)};
@@ -83,54 +89,55 @@ private:
 };
 ```
 
-**What you bought:** `NearestNeighborFinder` never mentions Euclidean or Manhattan by
-name. You can swap the strategy at runtime — read it from a config file, let a user
-pick it from a dropdown, change it mid-program. Adding a new distance metric means
-writing one new class; `NearestNeighborFinder` never changes (Open/Closed in its
-original, textbook form).
+`NearestNeighborFinder` does not refer to either concrete distance calculation.
+The program can select a strategy from user input or configuration and replace it
+through `SetStrategy` while running. A new distance metric can be introduced as
+another implementation of `DistanceStrategy` without changing
+`NearestNeighborFinder`. This is the Open/Closed Principle in its conventional
+object-oriented form.
 
-**What it costs:**
-- `strategy_->Distance(...)` is a **virtual call** — an indirect jump through a
-  vtable. The compiler cannot inline it, because it doesn't know at compile time
-  which override will run.
-- `std::unique_ptr<DistanceStrategy>` is a **heap allocation** and **pointer
-  indirection** just to hold "which rule to use."
-- If `FindNearest` is called on a candidate list of 10 points, this overhead is
-  noise. If it's called in the inner loop of a mesh algorithm touching millions of
-  points, the indirect call becomes a real, measurable cost — and worse, it defeats
-  auto-vectorization, because the compiler can't reason across an opaque virtual call.
+**Costs and limitations:**
+- `strategy_->Distance(...)` normally uses virtual dispatch. Unless the compiler can
+  devirtualize the call, this adds an indirect call and may prevent inlining.
+- In this implementation, constructing a strategy with `std::make_unique` allocates
+  the strategy object dynamically. The `std::unique_ptr` also introduces pointer
+  indirection. Runtime Strategy does not inherently require dynamic allocation, but
+  owning a polymorphic object this way is common.
+- These costs are usually insignificant for operations performed infrequently. In a
+  hot numerical loop, however, inhibited inlining and optimization may be measurable
+  and should be evaluated with profiling and benchmarks.
 
-This is the exact tension from our composition-over-inheritance conversation, now
-concretely quantified: Strategy gives you runtime flexibility by spending an
-indirection at every call. In a hot loop, that's a bad trade for something that
-never actually changes at runtime.
-
----
-
-## Part 3 — The insight: is the "variation" actually a runtime fact?
-
-Ask this question about the Euclidean/Manhattan example: **does any single program
-run ever need to switch distance metrics mid-execution?** Almost never. You typically
-know which metric you want *before you compile* — it's baked into the algorithm
-you're implementing, not a runtime user choice.
-
-If the variation point is known at compile time, paying a runtime indirection cost
-for it is pure waste. This is the moment to reach for **policy-based design**:
-same conceptual pattern (inject the varying behavior), different mechanism
-(template parameter instead of virtual base class).
+Runtime Strategy therefore exchanges some optimization opportunities for runtime
+extensibility. That exchange is appropriate when the selected behavior is genuinely
+a runtime concern. It may be unnecessary when the behavior is fixed for the lifetime
+of a compiled algorithm.
 
 ---
 
-## Part 4 — Policy-based design: the same Strategy, resolved at compile time
+## Part 3 — Determine when the variation is selected
+
+The central design question is whether the implementation must be selected at
+runtime. A user-facing application might allow the distance metric to be changed
+through configuration or an interface. By contrast, a specific numerical algorithm
+may define its metric as part of its type and never change it during execution.
+
+When selection is known at compile time, policy-based design represents the same
+variation with a template parameter rather than a virtual base class. This permits
+static type checking and gives the optimizer visibility into the concrete
+implementation.
+
+---
+
+## Part 4 — Policy-based design: compile-time selection
 
 ```cpp
 #include <cmath>
 #include <concepts>
+#include <vector>
 
 struct Point { double x{}, y{}; };
 
-// A "policy" is just a type with the expected interface — enforced with a concept,
-// not an inheritance requirement.
+// A policy is any type that satisfies this interface; inheritance is not required.
 template <typename P>
 concept DistancePolicy = requires(P policy, Point a, Point b) {
     { policy.Distance(a, b) } -> std::convertible_to<double>;
@@ -138,7 +145,7 @@ concept DistancePolicy = requires(P policy, Point a, Point b) {
 
 struct EuclideanPolicy {
     double Distance(const Point& a, const Point& b) const {
-        return std::sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
+        return std::hypot(a.x - b.x, a.y - b.y);
     }
 };
 
@@ -148,11 +155,11 @@ struct ManhattanPolicy {
     }
 };
 
-// The class that USES a policy — the policy is a template parameter, not a
-// runtime-injected object.
+// The policy is selected through a template parameter.
 template <DistancePolicy Policy>
 class NearestNeighborFinder {
 public:
+    // Precondition: candidates is not empty.
     Point FindNearest(const Point& query, const std::vector<Point>& candidates) const {
         Point best{candidates.front()};
         double best_dist{policy_.Distance(query, best)};
@@ -167,132 +174,143 @@ public:
     }
 
 private:
-    Policy policy_{};  // empty struct -> zero size, zero runtime cost
+    [[no_unique_address]] Policy policy_{};
 };
 
-// Usage: the "strategy choice" happens at the call site, at compile time
+// The policy is selected at the call site and forms part of the type.
 NearestNeighborFinder<EuclideanPolicy> euclidean_finder;
 NearestNeighborFinder<ManhattanPolicy> manhattan_finder;
 ```
 
-**What changed, mechanically:**
-- `policy_.Distance(...)` is now a call on a **concrete type known at compile time**
-  — the compiler can inline it completely. In an optimized build, the call
-  disappears; only the arithmetic remains.
-- `EuclideanPolicy`/`ManhattanPolicy` are empty structs — no vtable, no heap
-  allocation, `sizeof(Policy) == 1` (or genuinely 0 with `[[no_unique_address]]`).
-- The `DistancePolicy` concept plays the exact role the abstract base class played
-  before: it's still an *interface* — "must have a `Distance(Point, Point) -> double`
-  method" — just checked by the compiler at instantiation instead of enforced by
-  inheritance.
+**Mechanical differences:**
+- `policy_.Distance(...)` invokes a concrete type known at compile time. The compiler
+  can usually inline the function and optimize across the call.
+- The example policies contain no state, require no virtual table, and require no
+  dynamic allocation. `[[no_unique_address]]` allows an empty policy member to
+  occupy no additional storage when the object layout permits it.
+- The `DistancePolicy` concept specifies the required expression and return type.
+  The compiler checks this structural interface when the template is instantiated;
+  no inheritance relationship is required.
 
-**What you gave up:** you can no longer choose the policy at runtime. If your program
-genuinely needs to switch strategies based on user input read at runtime, this
-version can't do that — you'd need either the GoF version, or `std::variant` over a
-closed set of policies with `std::visit` dispatching once at a boundary (more on this
-tradeoff in Part 7).
+**Trade-off:** each policy produces a distinct `NearestNeighborFinder` type. This
+form cannot replace the policy of an existing object with an unrelated policy type
+at runtime. If runtime selection is required, use runtime polymorphism or, for a
+closed set of alternatives, a discriminated union such as `std::variant`.
 
-This is the whole idea of policy-based design in one example: **same conceptual
-pattern as Strategy, same benefit (decoupled, swappable behavior), moved from a
-runtime mechanism (virtual dispatch) to a compile-time mechanism (templates)** —
-because the thing that varies was actually a compile-time fact all along.
+Policy-based design preserves the separation between an operation and its
+implementation, but resolves that relationship through templates instead of virtual
+dispatch. The appropriate mechanism depends on when the implementation must be
+selected.
 
 ---
 
-## Part 5 — Multiple orthogonal policies (the Alexandrescu-style "policy host")
+## Part 5 — Multiple independent policies
 
-The real power of policy-based design shows up when a class has **more than one
-independent axis of variation**, and you want to mix and match them without an
-explosion of subclasses.
+Policy-based design is particularly useful when a class has several independent
+variation points. Each concern can be represented by a separate template parameter,
+allowing implementations to be combined without defining a class for every
+combination.
 
-Imagine a `Grid` class that varies along two *independent* dimensions: how it stores
-its cells, and how out-of-bounds access is handled.
+Consider a `Grid` whose cell storage and out-of-bounds behavior vary independently:
 
 ```cpp
-// Storage policy axis
+// Storage policies.
 struct DenseStorage {
-    // stores every cell explicitly, e.g. std::vector<Cell>
+    // Store every cell explicitly, for example in std::vector<Cell>.
 };
 struct SparseStorage {
-    // stores only non-empty cells, e.g. std::unordered_map<Index, Cell>
+    // Store only non-empty cells, for example in
+    // std::unordered_map<Index, Cell>.
 };
 
-// Bounds policy axis
+// Bounds policies.
 struct ClampBounds {
-    // out-of-range access clamps to the nearest valid index
+    // Clamp an out-of-range index to the nearest valid index.
 };
 struct WrapBounds {
-    // out-of-range access wraps around (periodic boundary)
+    // Wrap an out-of-range index to implement periodic boundaries.
 };
 
-// The host class takes BOTH policies as independent template parameters
+// The host accepts each concern as an independent policy.
 template <typename StoragePolicy, typename BoundsPolicy>
 class Grid : private StoragePolicy, private BoundsPolicy {
-    // ... implementation delegates storage decisions to StoragePolicy,
-    //     index-clamping decisions to BoundsPolicy
+    // Delegate storage operations to StoragePolicy and index normalization
+    // to BoundsPolicy.
 };
 
-// Every combination is available, with NO combinatorial subclassing:
+// Each combination is available without a separate named subclass.
 Grid<DenseStorage, ClampBounds>  grid_a;
 Grid<SparseStorage, WrapBounds>  grid_b;
 Grid<DenseStorage, WrapBounds>   grid_c;
 Grid<SparseStorage, ClampBounds> grid_d;
 ```
 
-**Why this matters, and why inheritance genuinely can't do this cleanly:** with
-classic single-inheritance Strategy, if you wanted both a storage strategy *and* a
-bounds strategy to vary independently, you'd need either multiple inheritance (messy,
-diamond-problem-prone) or you'd collapse both axes into one hierarchy
-(`DenseClampGrid`, `SparseWrapGrid`, ...) — which is exactly the combinatorial
-explosion that composition/policies are supposed to prevent. Independent template
-parameters give you the full cross-product of combinations for free, resolved and
-inlined at compile time, with zero runtime cost for any of it.
+Encoding both concerns in one class hierarchy would tend to produce classes such as
+`DenseClampGrid` and `SparseWrapGrid`. Independent policies instead represent the
+cross-product directly. Runtime composition with two Strategy objects can provide
+the same separation when runtime selection is required; policy parameters provide
+the compile-time form and allow calls to be inlined.
 
-(Note: inheriting from empty policy structs — `private StoragePolicy` — is the Empty
-Base Optimization; it lets the compiler eliminate their storage entirely when they
-carry no state, unlike a `Policy member_;` field which may still cost a byte per
-policy depending on your compiler/standard version.)
+The example uses private inheritance so that empty policy types may benefit from the
+Empty Base Optimization. In C++20, composition with
+`[[no_unique_address]] Policy policy_;` is often a clearer alternative. Stateful
+policies still require storage in either representation.
 
 ---
 
-## Part 6 — Applying this to your own code: fixing the tolerance problem
+## Part 6 — Example: configurable numerical tolerance
 
-Recall the tolerance discussion from earlier in this thread: `kTolerance<T>` in
-your `geometry.hpp` is a single global constant, which breaks down across different
-coordinate scales. **This is a policy-based design problem wearing a disguise.**
-Let's actually build the fix.
+A single global tolerance is often unsuitable for geometry represented at widely
+different coordinate scales. The method used to calculate tolerance is itself a
+variation point and can therefore be expressed as a policy.
 
-**Step 1 — name the interface every tolerance policy must satisfy:**
+The following examples assume that `ScalarType` is an existing floating-point
+concept.
+
+**Step 1 — define the required interface:**
 
 ```cpp
+#include <concepts>
+
 template <typename P, typename T>
-concept TolerancePolicy = requires(P policy, T value) {
+concept TolerancePolicy = requires(const P& policy) {
     { policy.Tolerance() } -> std::convertible_to<T>;
 };
 ```
 
-**Step 2 — write two concrete policies for two real scenarios:**
+**Step 2 — provide concrete policies:**
 
 ```cpp
-// Scenario 1: you know the fixed tolerance up front (current behavior, made explicit)
+#include <algorithm>
+#include <cmath>
+
+// A fixed absolute tolerance.
 template <ScalarType T>
 struct FixedTolerance {
     T value{static_cast<T>(1e-9)};
     T Tolerance() const { return value; }
 };
 
-// Scenario 2: tolerance scales with the model's bounding box diagonal —
-// solves the "microns vs. millimeters" problem from earlier
+// A scale-aware tolerance with an absolute lower bound.
 template <ScalarType T>
 struct ScaledTolerance {
     T bounding_box_diagonal{static_cast<T>(1.0)};
     T relative_epsilon{static_cast<T>(1e-9)};
-    T Tolerance() const { return bounding_box_diagonal * relative_epsilon; }
+    T absolute_floor{static_cast<T>(1e-12)};
+
+    T Tolerance() const {
+        return std::max(absolute_floor,
+                        std::abs(bounding_box_diagonal) * relative_epsilon);
+    }
 };
 ```
 
-**Step 3 — make `RobustSign` (and everything built on it) take a policy instead of a
-bare default:**
+The absolute floor remains meaningful for a zero-size or very small model. In
+production numerical code, the appropriate formula and constants must be derived
+from the operation being performed; a tolerance for an area predicate, for example,
+may scale differently from a tolerance for a coordinate comparison.
+
+**Step 3 — parameterize the operation:**
 
 ```cpp
 template <ScalarType T, TolerancePolicy<T> Policy>
@@ -304,111 +322,99 @@ inline int RobustSign(T value, const Policy& tolerance_policy) {
 }
 ```
 
-**What you now have, that you didn't before:**
-- `RobustSign` no longer hardcodes what "tolerance" means — it just requires
-  *something* that can produce a `T`.
-- Swapping from fixed to scaled tolerance is a **one-line change at the call site**
-  (`FixedTolerance<double>{}` → `ScaledTolerance<double>{diagonal, 1e-9}`), with zero
-  changes to `RobustSign` itself, `TriangleOrientation`, or anything downstream —
-  exactly the Open/Closed benefit, achieved with templates instead of inheritance.
-- Because both policies are concrete types resolved at compile time, there's no
-  runtime cost over your current hardcoded version — you get the flexibility for
-  free.
-
-This is precisely the exercise you'd want to be able to walk through live in a
-design interview: **take a hardcoded value, recognize it as an unstated policy,
-extract the policy, and show that extraction costs nothing at runtime.**
+`RobustSign` no longer defines what tolerance means; it only requires a policy that
+produces a value compatible with `T`. A caller can select `FixedTolerance<double>`
+or `ScaledTolerance<double>` without modifying `RobustSign`. Because the concrete
+policy type is visible to the compiler, this abstraction can normally be inlined.
+That claim should be confirmed by measurement if the function is performance
+critical. The policy must also produce a tolerance with the same physical dimension
+as `value`; template constraints can verify types and expressions, but not physical
+units represented by ordinary arithmetic types.
 
 ---
 
-## Part 7 — Decision framework: when do you still want runtime Strategy?
+## Part 7 — Choosing an appropriate dispatch mechanism
 
-Policy-based design isn't a strict upgrade — it's the right tool only when the
-condition from Part 3 holds. Ask, in order:
+Policy-based design is not a general replacement for runtime Strategy. The following
+questions help determine which mechanism is appropriate:
 
-1. **Is the variation known at compile time, for any given translation unit?**
-   - Yes → policy-based design (template parameter + concept).
-   - No (must be chosen at runtime — user input, config file, plugin loaded at
-     startup) → you need runtime dispatch of *some* form. Go to question 2.
+1. **Is the implementation known at compile time for each use?**
+   - If yes, a template parameter and, where useful, a concept are natural choices.
+   - If no—for example, the choice comes from user input, configuration, or a
+     dynamically loaded component—some form of runtime dispatch is required.
 
-2. **Is the set of possible variants closed and known in advance (even if the
-   *choice* among them happens at runtime)?**
-   - Yes → prefer `std::variant<PolicyA, PolicyB, PolicyC>` + `std::visit`. You still
-     get exhaustiveness checking and avoid heap allocation/vtables — the dispatch
-     cost is one runtime branch at the `visit` call, not scattered virtual calls
-     throughout the algorithm.
-   - No (truly open-ended — a plugin system where new strategies can be added
-     without recompiling) → classic GoF Strategy with virtual dispatch is the
-     correct, and really only, choice.
+2. **Is the set of runtime alternatives closed and known in advance?**
+   - If yes, `std::variant<PolicyA, PolicyB, PolicyC>` with `std::visit` may be
+     appropriate. It stores one of a fixed set of types directly and does not require
+     virtual dispatch. Its layout, code-size, and dispatch characteristics should
+     still be evaluated for the application.
+   - If no, an interface with virtual dispatch is usually the appropriate design.
+     This supports extension without modifying the context, although deployment and
+     ABI requirements determine whether new implementations can be added without
+     rebuilding other components.
 
-3. **Is this call site actually hot?** (called in a tight loop over large data,
-   vs. called once per user action or once per file load)
-   - Hot path → the compile-time cost of virtual dispatch is worth avoiding;
-     lean hard toward policies.
-   - Cold path (e.g., choosing a file importer once per file load) → the
-     indirection cost of classic Strategy is genuinely irrelevant; don't over-engineer
-     by templating something called once.
+3. **Is the operation performance-sensitive?**
+   - In a hot loop, static dispatch may enable valuable inlining and optimization.
+     Measure the alternatives before attributing a performance problem to virtual
+     dispatch alone.
+   - For an operation performed once per user action or file load, maintainability
+     and runtime extensibility usually matter more than dispatch overhead.
 
-**The one-sentence version:** *runtime Strategy and policy-based design solve the
-same problem; which one is correct is entirely determined by when the variation
-point is known and how hot the call site is — not by which one feels more "modern."*
-
----
-
-## Part 8 — Pitfalls of policy-based design (so you don't oversell it)
-
-Worth knowing these, because an interviewer who's satisfied you understand the
-benefit will often probe for the cost:
-
-- **Code bloat.** Every distinct template instantiation (`Grid<DenseStorage,
-  ClampBounds>` vs. `Grid<SparseStorage, WrapBounds>`) generates its own compiled
-  code. Heavy policy combinations across a large codebase can meaningfully increase
-  binary size and compile time — the mirror image of the Pimpl motivation from
-  earlier.
-- **Error messages.** Concept constraints help a lot here versus raw SFINAE, but
-  deeply nested policy-based templates can still produce long, hard-to-read compiler
-  errors when a policy doesn't satisfy its concept correctly.
-- **Header-only pressure.** Templates generally must be visible at the point of
-  instantiation, which pushes implementation into headers (exactly what your
-  `geometry-kernel` already embraces) — fine for a library like yours, but it's a
-  real architectural consequence, not a free lunch: every translation unit that uses
-  the template re-compiles it.
-- **You can over-genericize.** Not every varying value needs to become a template
-  parameter. If something varies rarely, isn't in a hot path, and the "variants" are
-  genuinely open-ended, forcing it into a policy is speculative generality — the same
-  smell from the "program to the interface" conversation, just wearing a template
-  instead of a virtual base class.
+In summary, runtime Strategy and policy-based design represent the same separation
+of concerns at different binding times. The selection time, extensibility
+requirements, ownership model, and measured performance characteristics should
+determine the choice.
 
 ---
 
-## Part 9 — Exercises to build intuition further
+## Part 8 — Costs of policy-based design
 
-Try these against your own repos, in order of difficulty:
+- **Generated code and compilation cost.** Distinct template instantiations may
+  generate distinct machine code. A large number of policy combinations can increase
+  build times and binary size, although link-time folding may remove some duplicates.
+- **Diagnostics and complexity.** Concepts generally improve diagnostics compared
+  with unconstrained templates or SFINAE, but deeply composed templates can still
+  produce difficult errors and expose more implementation detail to users.
+- **Definition visibility.** Template definitions generally must be visible at the
+  point of instantiation. This commonly moves implementation into headers and causes
+  multiple translation units to parse and instantiate the same templates. Explicit
+  instantiation can mitigate this for a known set of types.
+- **Type proliferation.** Each policy combination is a distinct C++ type. This may
+  complicate storage in homogeneous containers, stable ABI boundaries, and APIs that
+  should not expose implementation choices.
+- **Unnecessary generality.** A variation point should reflect a real requirement.
+  Introducing policy parameters speculatively can make an interface harder to use
+  without providing a practical benefit.
 
-1. **Warm-up:** In the `EuclideanPolicy`/`ManhattanPolicy` example above, add a third
+---
+
+## Part 9 — Exercises
+
+The following exercises progress from a local extension to broader design analysis:
+
+1. **Add a policy.** In the `EuclideanPolicy`/`ManhattanPolicy` example, add a third
    policy, `ChebyshevPolicy` (max of `|dx|`, `|dy|`), and confirm
    `NearestNeighborFinder<ChebyshevPolicy>` compiles with no changes to
    `NearestNeighborFinder` itself.
 
-2. **Applied to your code:** Actually make the `TolerancePolicy` change from Part 6
-   in `geometry-kernel` or `polygon-triangulation`. Update `RobustSign`,
+2. **Apply the tolerance policy.** Introduce the `TolerancePolicy` from Part 6 in a
+   geometry library. Update `RobustSign`,
    `NearlyEqualPoint`, and anything that calls them, to take a policy instead of the
-   implicit `kTolerance<T>` default. (Tip: give the policy a defaulted template
-   parameter — `template <ScalarType T, TolerancePolicy<T> Policy = FixedTolerance<T>>`
-   — so existing call sites keep compiling unchanged, which is itself a good example
-   of Open/Closed in practice.)
+   implicit `kTolerance<T>` default. If source compatibility is required, consider a
+   default policy:
 
-3. **Harder — multiple orthogonal policies:** Extend `PolygonMesh<T>` with a second,
-   independent template parameter for the *ear-validity test strategy* — e.g., a
-   `BruteForceReflexScan` policy (what it does today) vs. a hypothetical
-   `SpatialIndexReflexScan` policy (the AABB-accelerated version from the TODO you
-   already flagged). Sketch just the interface both policies would need to satisfy —
-   you don't need to implement the spatial index for this exercise, just prove the
-   two policies are swappable without touching the linked-list machinery.
+   ```cpp
+   template <ScalarType T, typename Policy = FixedTolerance<T>>
+       requires TolerancePolicy<Policy, T>
+   ```
 
-4. **Stretch — recognize the boundary:** Identify one place in Kynema-FMB (or any
-   codebase you know well) where a runtime `if`/`switch` on a "mode" or "type" enum
-   is actually gating a compile-time-known choice, and one place where runtime
-   dispatch is *correctly* used because the choice genuinely can't be known until
-   runtime. Being able to point to a real example of each, and explain *why* each one
-   is on the correct side of the line, is a strong signal in a design interview.
+3. **Compose independent policies.** Extend a polygon-mesh type with a second
+   template parameter for its ear-validity test—for example,
+   `BruteForceReflexScan` and `SpatialIndexReflexScan`. Define the interface required
+   by both policies and verify that either can be selected without changing the
+   mesh's linked-list implementation.
+
+4. **Identify the binding boundary.** Find one runtime `if` or `switch` whose choice
+   is actually known at compile time, and one use of runtime dispatch whose choice
+   cannot be known until execution. Explain why each belongs on its respective side
+   of the boundary.
